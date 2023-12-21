@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useRouter } from "next/router";
 import React from "react";
 import { cls } from "../libs/utils";
@@ -16,6 +17,7 @@ export default function Layout({
   hasTabBar,
   children,
 }: LayoutProps) {
+  const pathname = usePathname();
   const router = useRouter();
   const onClick = () => {
     router.back();
@@ -51,7 +53,13 @@ export default function Layout({
       <div className={cls("pt-16", hasTabBar ? "pb-16" : "")}>{children}</div>
       {hasTabBar ? (
         <nav className="bg-white w-full max-w-xl mx-auto font-medium py-3 fixed text-gray-800 border-t bottom-0 flex justify-between items-center text-xs">
-          <Link href="/" className="flex flex-col items-center ml-5 space-y-2">
+          <Link
+            href="/"
+            className={cls(
+              "flex flex-col items-center ml-5 space-y-2",
+              pathname === "/" ? "text-orange-500" : ""
+            )}
+          >
             <svg
               className="w-6 h-6"
               fill="none"
@@ -70,7 +78,10 @@ export default function Layout({
           </Link>
           <Link
             href="/community"
-            className="flex flex-col items-center space-y-2"
+            className={cls(
+              "flex flex-col items-center space-y-2",
+              pathname === "/community" ? "text-orange-500" : ""
+            )}
           >
             <svg
               className="w-6 h-6"
@@ -88,7 +99,13 @@ export default function Layout({
             </svg>
             <span>동네생활</span>
           </Link>
-          <Link href="/chats" className="flex flex-col items-center space-y-2">
+          <Link
+            href="/chats"
+            className={cls(
+              "flex flex-col items-center space-y-2",
+              pathname === "/chats" ? "text-orange-500" : ""
+            )}
+          >
             <svg
               className="w-6 h-6"
               fill="none"
@@ -105,7 +122,13 @@ export default function Layout({
             </svg>
             <span>채팅</span>
           </Link>
-          <Link href="/live" className="flex flex-col items-center space-y-2">
+          <Link
+            href="/live"
+            className={cls(
+              "flex flex-col items-center space-y-2",
+              pathname === "/live" ? "text-orange-500" : ""
+            )}
+          >
             <svg
               className="w-6 h-6"
               fill="none"
@@ -124,7 +147,10 @@ export default function Layout({
           </Link>
           <Link
             href="/profile"
-            className="flex flex-col items-center mr-5 space-y-2"
+            className={cls(
+              "flex flex-col items-center mr-5 space-y-2",
+              pathname === "/profile" ? "text-orange-500" : ""
+            )}
           >
             <svg
               className="w-6 h-6"
