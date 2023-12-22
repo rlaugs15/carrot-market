@@ -1,0 +1,22 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma" //관계모드 설정, foreign Keys 제약 부여
+}
+
+model User {
+  id       Int      @id @default(autoincrement()) //1~처럼 점점 증가할 것
+  phone    Int?     @unique //phone이 있을 때 값이 유일해짐
+  email    String   @unique
+  name     String
+  avatar   String?
+  createAt DateTime @default(now()) //new(): 새 유저가 만들어질 시점의 날짜를 넣어주는 함수
+  updateAt DateTime @updatedAt //유저 업데이트
+}
