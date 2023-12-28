@@ -1,14 +1,16 @@
 import { useState } from "react";
 
-interface UseMutationState {
+interface UseMutationState<T> {
   loading: boolean;
-  data?: object;
+  data?: T;
   error?: object;
 }
-type UseMutationResult = [(data: any) => void, UseMutationState]; //useMutation의 리턴타입
-
-export default function useMutation(url: string): UseMutationResult {
-  const [state, setSate] = useState<UseMutationState>({
+type UseMutationResult<T> = [(data: any) => void, UseMutationState<T>]; //useMutation의 리턴타입
+//제네릭 타입으로 해당 훅을 사용하는 개발자에게 받을 것 같은 응답의 타입을 보내줌
+export default function useMutation<T = any>(
+  url: string
+): UseMutationResult<T> {
+  const [state, setSate] = useState<UseMutationState<T>>({
     loading: false,
     data: undefined,
     error: undefined,
@@ -27,5 +29,7 @@ export default function useMutation(url: string): UseMutationResult {
       .catch((error) => setSate((prev) => ({ ...prev, error })))
       .finally(() => setSate((prev) => ({ ...prev, loading: false })));
   }
+  //사용자는 배열의 두 번째 요소로 받은 상태 객체{...state}를 마음대로 변경해도 내부적으로 사용되는 state에는 영향을 미치지 않음
+  //다양한 곳에서 훅으로 사용하기 위해 디폴드 값들을 유지
   return [mutation, { ...state }];
 }

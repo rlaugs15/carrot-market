@@ -1,20 +1,34 @@
 import { NextPage } from "next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { cls } from "../libs/client/utils";
 import Input from "./../components/input";
 import Button from "./../components/button";
 import useMutation from "./../libs/client/useMutation";
+import { useRouter } from "next/router";
 
 interface EnterForm {
   email?: string;
   phone?: string;
 }
 
+interface TokenForm {
+  token: string;
+}
+
+interface MutationResult {
+  ok: boolean;
+}
+
 const Enter: NextPage = () => {
-  const [enter, { loading, data, error }] = useMutation("/api/users/enter");
+  const [enter, { loading, data, error }] =
+    useMutation<MutationResult>("/api/users/enter");
+  const [confirmToken, { loading: tokenLoading, data: tokenData }] =
+    useMutation<MutationResult>("/api/users/confirm");
   const [submitting, setSubmitting] = useState(false);
   const { register, watch, reset, handleSubmit } = useForm<EnterForm>();
+  const { register: tokenRegister, handleSubmit: tokenHandleSubmit } =
+    useForm<TokenForm>();
   const [method, setMethod] = useState<"email" | "phone">("email");
   const onEmailClick = () => {
     reset();
@@ -25,76 +39,109 @@ const Enter: NextPage = () => {
     setMethod("phone");
   };
   const handleValue = (data: EnterForm) => {
+    if (loading) return;
     enter(data);
-    console.log(loading, data, error);
   };
+  const onTokenValue = (data: TokenForm) => {
+    if (tokenLoading) return;
+    confirmToken(data);
+  };
+  const router = useRouter();
+  useEffect(() => {
+    if (tokenData) {
+      router.push("/");
+    }
+  }, [tokenData, router]); //router 넣은 이유: useEffect 내부에서 사용하는 모든 항목도 [ ]에 있어야 함.
   return (
     <div className="mt-16 px-4">
       <h3 className="text-3xl font-bold text-center">Enter to Carrot</h3>
       <div className="mt-12">
-        <div className="flex flex-col items-center">
-          <h5 className="text-sm text-gray-500 font-medium">Enter using:</h5>
-          <div className="grid  border-b  w-full mt-8 grid-cols-2 ">
-            <button
-              className={cls(
-                "pb-4 font-medium text-sm border-b-2",
-                method === "email"
-                  ? " border-orange-500 text-orange-400"
-                  : "border-transparent hover:text-gray-400 text-gray-500"
-              )}
-              onClick={onEmailClick}
-            >
-              Email
-            </button>
-            <button
-              className={cls(
-                "pb-4 font-medium text-sm border-b-2",
-                method === "phone"
-                  ? " border-orange-500 text-orange-400"
-                  : "border-transparent hover:text-gray-400 text-gray-500"
-              )}
-              onClick={onPhoneClick}
-            >
-              Phone
-            </button>
-          </div>
-        </div>
-        <form
-          onSubmit={handleSubmit(handleValue)}
-          className="flex flex-col mt-8"
-        >
-          <div className="mt-1">
-            {method === "email" ? (
+        {data?.ok ? (
+          <form
+            className="flex flex-col mt-8"
+            onSubmit={tokenHandleSubmit(onTokenValue)}
+          >
+            <div className="mt-1">
               <Input
-                register={register("email")}
+                register={tokenRegister("token")}
                 name="email"
-                label="Email adress"
+                label="Confirmation Token"
                 id="input"
-                type="email"
+                type="text"
                 required
               />
-            ) : null}
-            {method === "phone" ? (
-              <Input
-                register={register("phone")}
-                name="phone"
-                label="Phone number"
-                type="number"
-                kind="phone"
-                required
+            </div>
+            <Button text={loading ? "loading" : "confirm Token"} />
+          </form>
+        ) : (
+          <>
+            <div className="flex flex-col items-center">
+              <h5 className="text-sm text-gray-500 font-medium">
+                Enter using:
+              </h5>
+              <div className="grid  border-b  w-full mt-8 grid-cols-2 ">
+                <button
+                  className={cls(
+                    "pb-4 font-medium text-sm border-b-2",
+                    method === "email"
+                      ? " border-orange-500 text-orange-400"
+                      : "border-transparent hover:text-gray-400 text-gray-500"
+                  )}
+                  onClick={onEmailClick}
+                >
+                  Email
+                </button>
+                <button
+                  className={cls(
+                    "pb-4 font-medium text-sm border-b-2",
+                    method === "phone"
+                      ? " border-orange-500 text-orange-400"
+                      : "border-transparent hover:text-gray-400 text-gray-500"
+                  )}
+                  onClick={onPhoneClick}
+                >
+                  Phone
+                </button>
+              </div>
+            </div>
+            <form
+              onSubmit={handleSubmit(handleValue)}
+              className="flex flex-col mt-8"
+            >
+              <div className="mt-1">
+                {method === "email" ? (
+                  <Input
+                    register={register("email")}
+                    name="email"
+                    label="Email adress"
+                    id="input"
+                    type="email"
+                    required
+                  />
+                ) : null}
+                {method === "phone" ? (
+                  <Input
+                    register={register("phone")}
+                    name="phone"
+                    label="Phone number"
+                    type="number"
+                    kind="phone"
+                    required
+                  />
+                ) : null}
+              </div>
+              <Button
+                text={`${
+                  submitting
+                    ? "loading..."
+                    : method === "email"
+                      ? "Get login link"
+                      : "Get one-time password"
+                }`}
               />
-            ) : null}
-          </div>
-          <Button
-            text={`${
-              submitting
-                ? "loading..."
-                : method === "email"
-                  ? "Get login link"
-                  : "Get one-time password"
-            }`}
-          />
-        </form>
+            </form>
+          </>
+        )}
         <div className="mt-8">
           <div className="relative">
             <div className="absolute w-full border-t border-gray-300" />

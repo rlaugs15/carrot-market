@@ -13,10 +13,22 @@ datasource db {
 
 model User {
   id       Int      @id @default(autoincrement()) //1~처럼 점점 증가할 것
-  phone    Int?     @unique //phone이 있을 때 값이 유일해짐
-  email    String   @unique
+  phone    String?  @unique //phone이 있을 때 값이 유일해짐,bigint or string 중에 택
+  email    String?  @unique
   name     String
   avatar   String?
   createAt DateTime @default(now()) //new(): 새 유저가 만들어질 시점의 날짜를 넣어주는 함수
   updateAt DateTime @updatedAt //유저 업데이트
+  Tokens   Token[]
+}
+
+//user의 User타입은 위의 모델, user User하고 저장하면 나머진 자동완성(위의 Token Token[]도), 몽구스의 리퍼런스와 비슷한 역할
+//user와 userId를 가지는 이유는 실제 db에 user 전체 데이터가 들어가지 않기 때문, 대신 userId가 들어감
+model Token {
+  id       Int      @id @default(autoincrement())
+  payload  String   @unique //유저의 이메일, 폰 정보가 들어갈 것
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   Int
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
 }

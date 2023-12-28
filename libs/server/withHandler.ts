@@ -1,5 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
 
+export interface ResponesType {
+  ok: boolean;
+  [key: string]: any; //NextApiResponse 콜 시그니쳐로 확인 가능
+}
+
 type Method = "GET" | "POST" | "DELETE";
 type FnResult = (req: NextApiRequest, res: NextApiResponse) => void;
 
