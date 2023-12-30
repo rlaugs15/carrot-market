@@ -24,7 +24,7 @@ async function handler(
       user: {
         connectOrCreate: {
           where: {
-            ...user, //phone과 email이 둘 다 있을 경우를 위해 ...연산자
+            ...user, //user를 적으면 스키마의 속성과 맞지 않으므로 ...user를 사용하여 user 안에 있는 속성들을 반영
           },
           create: {
             name: "jun",
@@ -50,18 +50,15 @@ async function handler(
       subject: "당근 인증 이메일",
       text: `인증 코드 : ${payload}`,
     };
-    const result = await smtpTransport.sendMail(
-      mailOptions,
-      (error, responses) => {
-        if (error) {
-          console.log(error);
-          return null;
-        } else {
-          console.log(responses);
-          return null;
-        }
+    await smtpTransport.sendMail(mailOptions, (error, responses) => {
+      if (error) {
+        console.log(error);
+        return null;
+      } else {
+        console.log(responses);
+        return null;
       }
-    );
+    });
     smtpTransport.close();
   }
   return res.json({
@@ -69,4 +66,4 @@ async function handler(
   });
 }
 
-export default withHandler("POST", handler);
+export default withHandler({ method: "POST", handler, isPrivate: false });

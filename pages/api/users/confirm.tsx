@@ -1,8 +1,11 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 import client from "@/libs/client/client";
-import withHandler, { ResponesType } from "@/libs/server/withHandler";
-import { getIronSession } from "iron-session";
+import withHandler, {
+  ResponesType,
+  SessionData,
+} from "@/libs/server/withHandler";
+import { IronSession } from "iron-session";
 
 /* declare module "iron-session" {
   interface IronSessionData {
@@ -13,20 +16,11 @@ import { getIronSession } from "iron-session";
   }
 } */
 
-interface SessionData {
-  user?: {
-    id: number;
-  };
-}
-
 async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ResponesType>
+  res: NextApiResponse<ResponesType>,
+  session: IronSession<SessionData>
 ) {
-  const session = await getIronSession<SessionData>(req, res, {
-    password: process.env.NEXT_PUBLIC_COOKIE_PASSWORD,
-    cookieName: "carrotsession",
-  });
   const { token } = req.body;
   const exists = await client.token.findUnique({
     where: {
@@ -48,4 +42,4 @@ async function handler(
   return res.json({ ok: true });
 }
 
-export default withHandler("POST", handler);
+export default withHandler({ method: "POST", handler });

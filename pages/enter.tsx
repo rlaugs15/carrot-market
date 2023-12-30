@@ -26,7 +26,7 @@ const Enter: NextPage = () => {
   const [confirmToken, { loading: tokenLoading, data: tokenData }] =
     useMutation<MutationResult>("/api/users/confirm");
   const [submitting, setSubmitting] = useState(false);
-  const { register, watch, reset, handleSubmit } = useForm<EnterForm>();
+  const { register, reset, handleSubmit } = useForm<EnterForm>();
   const { register: tokenRegister, handleSubmit: tokenHandleSubmit } =
     useForm<TokenForm>();
   const [method, setMethod] = useState<"email" | "phone">("email");

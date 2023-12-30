@@ -1,0 +1,27 @@
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useEffect } from "react";
+import useSWR from "swr";
+
+//const fetcher = (url: string) => fetch(url).then((response) => response.json());
+//유저 데이터에 접근할 수 잇는 훅을 만들고 각 페이지에서 데이터를 불러오면 편하다.
+export default function useUser() {
+  const { data, error } = useSWR("/api/users/me");
+  const router = useRouter();
+  useEffect(() => {
+    if (data && !data.ok) {
+      return router.replace("/enter");
+    }
+  }, [data, router]);
+  /* useEffect(() => {
+    fetch("/api/users/me")
+      .then((response) => response.json())
+      .then((data) => {
+        if (!data.ok) {
+          return router.replace("/enter");
+        }
+        setUser(data.profile);
+      });
+  }, [router]); */
+  return { user: data?.profile, isLoading: !data && !error };
+}
