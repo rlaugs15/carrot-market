@@ -4,21 +4,17 @@ import withHandler, {
   ResponesType,
   SessionData,
 } from "@/libs/server/withHandler";
-import { getIronSession } from "iron-session";
+import { getIronSession, IronSession } from "iron-session";
 
 async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<ResponesType>
+  res: NextApiResponse<ResponesType>,
+  session: IronSession<SessionData>
 ) {
-  const session = await getIronSession<SessionData>(req, res, {
-    password: process.env.NEXT_PUBLIC_COOKIE_PASSWORD,
-    cookieName: "carrotsession",
-  });
-
   const profile = await client.user.findUnique({
     where: { id: session.user!.id },
   });
-  res.json({ ok: true, profile });
+  return res.json({ ok: true, profile });
 }
 
-export default withHandler({ method: "GET", handler });
+export default withHandler({ methods: ["GET"], handler });

@@ -1,9 +1,13 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
 import client from "@/libs/client/client";
-import withHandler, { ResponesType } from "@/libs/server/withHandler";
+import withHandler, {
+  ResponesType,
+  SessionData,
+} from "@/libs/server/withHandler";
 import twilio from "twilio";
 import smtpTransport from "@/libs/server/email";
+import { IronSession } from "iron-session";
 
 const twilioClient = twilio(
   process.env.NEXT_PUBLIC_TWILIO_ACCOUNT_SID,
@@ -66,4 +70,4 @@ async function handler(
   });
 }
 
-export default withHandler({ method: "POST", handler, isPrivate: false });
+export default withHandler({ methods: ["POST"], handler, isPrivate: false });

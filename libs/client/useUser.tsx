@@ -8,6 +8,7 @@ import useSWR from "swr";
 export default function useUser() {
   const { data, error } = useSWR("/api/users/me");
   const router = useRouter();
+  //데이터가 변경될 때만 호출되도록 `useEffect`를 사용
   useEffect(() => {
     if (data && !data.ok) {
       return router.replace("/enter");
