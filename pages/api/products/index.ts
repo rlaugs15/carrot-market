@@ -13,7 +13,14 @@ async function handler(
 ) {
   const { name, price, description } = req.body;
   if (req.method === "GET") {
-    const products = await client.product.findMany({});
+    const products = await client.product.findMany({
+      include: {
+        //include만 하면 전체 Favs 레코드를 불러오기에 좋은 방법은 아님. 숫자만 세면 된다.
+        _count: {
+          select: { Favs: true },
+        },
+      },
+    });
 
     return res.json({ ok: true, products });
   }

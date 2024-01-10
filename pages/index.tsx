@@ -7,9 +7,15 @@ import FloatingButton from "@/components/floathing-button";
 import { Product } from "@prisma/client";
 import Item from "@/components/item";
 
+interface ProductWithCount extends Product {
+  _count: {
+    Favs: number;
+  };
+}
+
 interface ProductResponse {
   ok: boolean;
-  products: Product[];
+  products: ProductWithCount[];
 }
 
 const Home: NextPage = () => {
@@ -27,7 +33,7 @@ const Home: NextPage = () => {
             title={item.name}
             price={item.price}
             comments={1}
-            hearts={2}
+            hearts={item._count.Favs}
           />
         ))}
         <FloatingButton href="/products/upload">

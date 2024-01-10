@@ -1,7 +1,7 @@
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import Layout from "../../components/layout";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import { Product, User } from "@prisma/client";
 import Link from "next/link";
 import useMutation from "@/libs/client/useMutation";
@@ -20,7 +20,12 @@ interface ProductData {
 
 const ItemDetail: NextPage = () => {
   const router = useRouter();
-  const { data, mutate } = useSWR<ProductData>(
+  const { mutate } = useSWRConfig();
+  const {
+    data,
+    mutate: boundMutate,
+    isLoading,
+  } = useSWR<ProductData>(
     router.query.id ? `/api/products/${router.query.id}` : null
   );
   const [toggleFav] = useMutation(`/api/products/${router.query.id}/fav`);
@@ -28,8 +33,12 @@ const ItemDetail: NextPage = () => {
     //Optimistic UI Update이기 때문에 await 제외
     //toggleFav({});
     if (!data) return;
-    //mutate({ ...data, product: { ...data?.product, name: "potato" } }, false); 상품 이름이 즉시 바뀜
-    mutate({ ...data, isLiked: !data.isLiked }, false); //두 번째 인자는 다시 데이터를 가져오지 않을 거라 false
+    //상품 이름이 반응형처럼 즉시 바뀜
+    if (!isLoading) {
+      boundMutate({ ...data, isLiked: !data.isLiked }, false); //두 번째 인자는 다시 데이터를 가져오지 않을 거라 false
+      //mutate('/api/users/me',(prev:any)=>({ok:!prev.false}), false) 언바운드 뮤테이트 예시
+    }
+    toggleFav({});
   };
   return (
     <Layout canGoBack>
