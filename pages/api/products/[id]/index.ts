@@ -59,7 +59,7 @@ async function handler(
     })
   );
 
-  return res.json({ ok: true, product, isLiked, relatedProducts });
+  return res.json({ ok: true, product, relatedProducts, isLiked });
 }
 
 export default withHandler({ methods: ["GET"], handler });

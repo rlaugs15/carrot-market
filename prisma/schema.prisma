@@ -12,16 +12,19 @@ datasource db {
 }
 
 model User {
-  id       Int       @id @default(autoincrement()) //1~처럼 점점 증가할 것
-  phone    String?   @unique //phone이 있을 때 값이 유일해짐,bigint or string 중에 택
-  email    String?   @unique
-  name     String
-  avatar   String?
-  createAt DateTime  @default(now()) //new(): 새 유저가 만들어질 시점의 날짜를 넣어주는 함수
-  updateAt DateTime  @updatedAt //유저 업데이트
-  Tokens   Token[]
-  Products Product[]
-  Favs     Fav[]
+  id         Int         @id @default(autoincrement()) //1~처럼 점점 증가할 것
+  phone      String?     @unique //phone이 있을 때 값이 유일해짐,bigint or string 중에 택
+  email      String?     @unique
+  name       String
+  avatar     String?
+  createAt   DateTime    @default(now()) //new(): 새 유저가 만들어질 시점의 날짜를 넣어주는 함수
+  updateAt   DateTime    @updatedAt //유저 업데이트
+  Tokens     Token[]
+  Products   Product[]
+  Favs       Fav[]
+  Posts      Post[]
+  Answers    Answer[]
+  Wonderings Wondering[]
 }
 
 //user의 User타입은 위의 모델, user User하고 저장하면 나머진 자동완성(위의 Token Token[]도), 몽구스의 리퍼런스와 비슷한 역할
@@ -57,13 +60,56 @@ model Product {
 
 model Fav {
   id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([productId])
+}
+
+//질문자
+model Post {
+  id         Int         @id @default(autoincrement())
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
+  question   String      @db.MediumText
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  Answers    Answer[]
+  Wonderings Wondering[]
+
+  @@index([userId])
+}
+
+//답변자
+model Answer {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    Int
+  answer    String   @db.MediumText
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([postId])
+}
+
+//동네생활 탭의 궁금해요 버튼
+model Wondering {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([postId])
 }
