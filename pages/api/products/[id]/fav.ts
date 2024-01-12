@@ -12,6 +12,15 @@ async function handler(
   session: IronSession<SessionData>
 ) {
   const { id } = req.query;
+  const product = await client.product.findUnique({
+    where: {
+      id: +id!,
+    },
+    select: {
+      id: true,
+    },
+  });
+  if (!product) return res.status(404).end;
   const exits = await client.fav.findFirst({
     where: {
       userId: session.user?.id,

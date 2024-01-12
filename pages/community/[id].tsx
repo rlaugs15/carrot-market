@@ -6,6 +6,8 @@ import { Answer, Post, User } from "@prisma/client";
 import { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import useSWR from "swr";
 
 interface AnswerWithUser extends Answer {
@@ -27,12 +29,23 @@ interface CommunityPostResponse {
   isWondering: boolean;
 }
 
+interface AnswerFrom {
+  answer: string;
+}
+
+interface AnswerResponse {
+  ok: boolean;
+  answer: Answer;
+}
+
 const CommunityPostDetail: NextPage = () => {
   const router = useRouter();
   const { data, mutate } = useSWR<CommunityPostResponse>(
     router.query.id ? `/api/posts/${router.query.id}` : null
   );
-  const [wonder] = useMutation(`/api/posts/${router.query.id}/wonder`);
+  const [wonder, { loading }] = useMutation(
+    `/api/posts/${router.query.id}/wonder`
+  );
   const onWonderClick = () => {
     if (!data) return;
     mutate(
@@ -51,8 +64,26 @@ const CommunityPostDetail: NextPage = () => {
       },
       false
     );
-    wonder({}); //주석처리하고 먼저 mutate작업 먼저 했다
+    if (!loading) {
+      wonder({}); //주석처리하고 먼저 mutate작업 먼저 했다
+    }
   };
+  const [sendAnswer, { data: answerData, loading: answerLoading }] =
+    useMutation<AnswerResponse>(`/api/posts/${router.query.id}/answer`);
+  const { register, handleSubmit, reset } = useForm<AnswerFrom>();
+  const onValid = (formData: AnswerFrom) => {
+    if (answerLoading) return;
+    sendAnswer(formData);
+  };
+  //데이터가 전송됐으면 form을 리셋
+  useEffect(() => {
+    if (answerData && answerData.ok) {
+      reset();
+      //답글 실시간으로 달기. mutate를 이렇게 호출하면 그냥 re-fetch만 한다. post자체를 re-fetch
+      //pagination 해야 함
+      mutate();
+    }
+  }, [answerData, reset, mutate]);
   return (
     <Layout canGoBack>
       <div>
@@ -137,14 +168,21 @@ const CommunityPostDetail: NextPage = () => {
           ))}
         </div>
         <div className="px-4">
-          <TextArea
-            name="description"
-            placeholder="질문에 답해주세요!"
-            required
-          />
-          <button className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:outline-none ">
-            Reply
-          </button>
+          <form onSubmit={handleSubmit(onValid)}>
+            <TextArea
+              register={register("answer", {
+                required: true,
+                minLength: 2,
+              })}
+              name="description"
+              placeholder="질문에 답해주세요!"
+              required
+              minlength="2"
+            />
+            <button className="mt-2 w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:outline-none ">
+              {answerLoading ? "loading..." : "Reply"}
+            </button>
+          </form>
         </div>
       </div>
     </Layout>

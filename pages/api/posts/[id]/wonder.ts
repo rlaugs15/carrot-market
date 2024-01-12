@@ -12,6 +12,15 @@ async function handler(
   session: IronSession<SessionData>
 ) {
   const { id } = req.query;
+  const post = await client.post.findUnique({
+    where: {
+      id: +id!,
+    },
+    select: {
+      id: true,
+    },
+  });
+  if (!post) return res.status(404).end;
   const exits = await client.wondering.findFirst({
     where: {
       userId: session.user?.id,

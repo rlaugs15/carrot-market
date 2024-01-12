@@ -12,17 +12,36 @@ async function handler(
   session: IronSession<SessionData>
 ) {
   const { question } = req.body;
-  const post = await client.post.create({
-    data: {
-      question,
-      user: {
-        connect: {
-          id: session.user!.id,
+  if (req.method === "POST") {
+    const post = await client.post.create({
+      data: {
+        question,
+        user: {
+          connect: {
+            id: session.user!.id,
+          },
         },
       },
-    },
-  });
-  return res.json({ ok: true, post });
+    });
+    res.json({ ok: true, post });
+  }
+  if (req.method === "GET") {
+    const posts = await client.post.findMany({
+      include: {
+        user: {
+          select: {
+            id: true, //사용자 페이지에 대한 링크를 만들 때 map의 키로 사용
+            name: true,
+            avatar: true,
+          },
+        },
+        _count: {
+          select: { Wonderings: true, Answers: true },
+        },
+      },
+    });
+    res.json({ ok: true, posts });
+  }
 }
 
-export default withHandler({ methods: ["POST"], handler });
+export default withHandler({ methods: ["GET", "POST"], handler });
