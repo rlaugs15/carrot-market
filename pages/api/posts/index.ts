@@ -11,11 +11,13 @@ async function handler(
   res: NextApiResponse<ResponesType>,
   session: IronSession<SessionData>
 ) {
-  const { question } = req.body;
+  const { question, latitude, longitude } = req.body;
   if (req.method === "POST") {
     const post = await client.post.create({
       data: {
         question,
+        latitude,
+        longitude,
         user: {
           connect: {
             id: session.user!.id,

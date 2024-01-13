@@ -1,4 +1,5 @@
 import TextArea from "@/components/textarea";
+import useCoords from "@/libs/client/useCoords";
 import useMutation from "@/libs/client/useMutation";
 import { Post } from "@prisma/client";
 import type { NextPage } from "next";
@@ -16,12 +17,14 @@ interface WriteResponse {
 }
 
 const Write: NextPage = () => {
+  const { latitude, longitude } = useCoords();
   const router = useRouter();
   const { register, handleSubmit } = useForm<WriteForm>();
   const [post, { loading, data }] = useMutation<WriteResponse>("/api/posts");
   const onValid = (data: WriteForm) => {
     if (loading) return;
-    post(data);
+    //(data)를 ({...data})로 열고 안에 있는 데이터를 꺼낸 다음 위도와 경도를 같이 넣었다.
+    post({ ...data, latitude, longitude });
   };
   useEffect(() => {
     //post요청을 보내면, 새로 만들어진 post의 id가 담긴 res를 받을 것
