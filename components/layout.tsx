@@ -7,6 +7,7 @@ import { cls } from "../libs/client/utils";
 interface LayoutProps {
   title?: string;
   canGoBack?: boolean;
+  canGoBackHandle?: string;
   hasTabBar?: boolean;
   children: React.ReactNode;
 }
@@ -14,13 +15,18 @@ interface LayoutProps {
 export default function Layout({
   title,
   canGoBack,
+  canGoBackHandle,
   hasTabBar,
   children,
 }: LayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const onClick = () => {
-    router.back();
+    if (canGoBackHandle) {
+      router.push(canGoBackHandle);
+    } else {
+      router.back();
+    }
   };
   return (
     <div>

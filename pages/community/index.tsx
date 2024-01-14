@@ -4,6 +4,7 @@ import Link from "next/link";
 import Layout from "../../components/layout";
 import useSWR from "swr";
 import { Post, User } from "@prisma/client";
+import useCoords from "@/libs/client/useCoords";
 
 interface PostWithUser extends Post {
   user: User;
@@ -19,9 +20,11 @@ interface PostResponse {
 }
 
 const Community: NextPage = () => {
-  const { data } = useSWR<PostResponse>("/api/posts");
-  console.log(data);
-
+  const { latitude, longitude } = useCoords();
+  //쿼리 스트링을 활용하면 req.query에서 해당 파라미터들(longitude, latitude)에 접근이 가능
+  const { data } = useSWR<PostResponse>(
+    `/api/posts?latitude=${latitude}&longitude=${longitude}`
+  );
   return (
     <Layout hasTabBar title="동네생활">
       <div className="space-y-4 divide-y-[2px]">

@@ -28,6 +28,7 @@ async function handler(
     res.json({ ok: true, post });
   }
   if (req.method === "GET") {
+    const { latitude, longitude } = req.query; //req.body와 충돌을 피하기 위해 지역변수로 기입
     const posts = await client.post.findMany({
       include: {
         user: {
@@ -39,6 +40,16 @@ async function handler(
         },
         _count: {
           select: { Wonderings: true, Answers: true },
+        },
+      },
+      where: {
+        latitude: {
+          gte: Number(latitude) - 0.01,
+          lte: Number(latitude) + 0.01,
+        },
+        longitude: {
+          gte: Number(longitude) - 0.01,
+          lte: Number(longitude) + 0.01,
         },
       },
     });

@@ -21,7 +21,11 @@ const Write: NextPage = () => {
   const router = useRouter();
   const { register, handleSubmit } = useForm<WriteForm>();
   const [post, { loading, data }] = useMutation<WriteResponse>("/api/posts");
+
   const onValid = (data: WriteForm) => {
+    console.log("data", data);
+    console.log("...data", { ...data });
+
     if (loading) return;
     //(data)를 ({...data})로 열고 안에 있는 데이터를 꺼낸 다음 위도와 경도를 같이 넣었다.
     post({ ...data, latitude, longitude });
