@@ -23,7 +23,9 @@ const Community: NextPage = () => {
   const { latitude, longitude } = useCoords();
   //쿼리 스트링을 활용하면 req.query에서 해당 파라미터들(longitude, latitude)에 접근이 가능
   const { data } = useSWR<PostResponse>(
-    `/api/posts?latitude=${latitude}&longitude=${longitude}`
+    latitude && longitude
+      ? `/api/posts?latitude=${latitude}&longitude=${longitude}`
+      : null
   );
   return (
     <Layout hasTabBar title="동네생활">
