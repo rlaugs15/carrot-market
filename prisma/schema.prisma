@@ -29,7 +29,7 @@ model User {
   receivedReviews Review[]    @relation(name: "receivedReviews")
   Sales           Sale[]
   Purchases       Purchase[]
-  Record          Record[]
+  //Record          Record[]
 }
 
 //user의 User타입은 위의 모델, user User하고 저장하면 나머진 자동완성(위의 Token Token[]도), 몽구스의 리퍼런스와 비슷한 역할
@@ -61,7 +61,7 @@ model Product {
   Favs        Fav[]
   Sales       Sale[]
   Purchases   Purchase[]
-  Record      Record[]
+  //Record      Record[]
 
   @@index([userId])
 }
@@ -165,22 +165,24 @@ model Purchase {
   @@index([productId])
 }
 
-model Record {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    Int
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId Int
-  createdAt DateTime @default(now())
-  kind      Kind
-  updatedAt DateTime @updatedAt
+//같은 모양의 모델을 여럿 만들 땐 이처럼 enum을 사용하면 된다. 프론트에서 kind를 이용해 record를 찾으면 된다.
+//하지만 이미 로직을 다 만들었기 때문에 적용하려면 코드를 수정해야해서 바꾸진 않겠다.
+// model Record {
+//   id        Int      @id @default(autoincrement())
+//   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   userId    Int
+//   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+//   productId Int
+//   createdAt DateTime @default(now())
+//   kind      Kind
+//   updatedAt DateTime @updatedAt
 
-  @@index([userId])
-  @@index([productId])
-}
+//   @@index([userId])
+//   @@index([productId])
+// }
 
-enum Kind {
-  Purchase
-  Sale
-  Fav
-}
+// enum Kind {
+//   Purchase
+//   Sale
+//   Fav
+// }
