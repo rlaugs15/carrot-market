@@ -12,19 +12,24 @@ datasource db {
 }
 
 model User {
-  id         Int         @id @default(autoincrement()) //1~처럼 점점 증가할 것
-  phone      String?     @unique //phone이 있을 때 값이 유일해짐,bigint or string 중에 택
-  email      String?     @unique
-  name       String
-  avatar     String?
-  createAt   DateTime    @default(now()) //new(): 새 유저가 만들어질 시점의 날짜를 넣어주는 함수
-  updateAt   DateTime    @updatedAt //유저 업데이트
-  Tokens     Token[]
-  Products   Product[]
-  Favs       Fav[]
-  Posts      Post[]
-  Answers    Answer[]
-  Wonderings Wondering[]
+  id              Int         @id @default(autoincrement()) //1~처럼 점점 증가할 것
+  phone           String?     @unique //phone이 있을 때 값이 유일해짐,bigint or string 중에 택
+  email           String?     @unique
+  name            String
+  avatar          String?
+  createAt        DateTime    @default(now()) //new(): 새 유저가 만들어질 시점의 날짜를 넣어주는 함수
+  updateAt        DateTime    @updatedAt //유저 업데이트
+  Tokens          Token[]
+  Products        Product[]
+  Favs            Fav[]
+  Posts           Post[]
+  Answers         Answer[]
+  Wonderings      Wondering[]
+  writtenReviews  Review[]    @relation(name: "writtenReviews")
+  receivedReviews Review[]    @relation(name: "receivedReviews")
+  Sales           Sale[]
+  Purchases       Purchase[]
+  Record          Record[]
 }
 
 //user의 User타입은 위의 모델, user User하고 저장하면 나머진 자동완성(위의 Token Token[]도), 몽구스의 리퍼런스와 비슷한 역할
@@ -44,16 +49,19 @@ model Token {
 //MediumText:  텍스트 데이터를 저장하기 위한 컬럼 타입 중 하나, 
 //중간 정도 크기의 텍스트를 저장하기에 적합, 웹 사이트의 게시물 내용이나 댓글과 같은 텍스트 데이터를 저장할 때 활용 
 model Product {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          Int        @id @default(autoincrement())
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      Int
   image       String
   name        String
   price       Int
-  description String   @db.MediumText
+  description String     @db.MediumText
   Favs        Fav[]
+  Sales       Sale[]
+  Purchases   Purchase[]
+  Record      Record[]
 
   @@index([userId])
 }
@@ -114,4 +122,65 @@ model Wondering {
 
   @@index([userId])
   @@index([postId])
+}
+
+//같은 User을 가지고 있으므로 User가 구분할 수 있도록 서로 다른 이름을 준다!!!(객체 구조 분해를 생각하면 쉽다. )
+//name를 지정하면 나중에 유저가 작성한 리뷰를 보려면 user.writtenReviews로 접근할 수 있다.(유저가 받은 리뷰는 receivedReviews)
+//createBy: 리뷰 작성자, createFor: 리뷰를 받는 대상
+//@unique로 각 리뷰가 단 하나의 작성자와 수신자만을 가질 수 있도록 보장
+model Review {
+  id           Int      @id @default(autoincrement())
+  createdBy    User     @relation(name: "writtenReviews", fields: [createdById], references: [id], onDelete: Cascade)
+  createdById  Int      @unique
+  createdFor   User     @relation(name: "receivedReviews", fields: [createdForId], references: [id], onDelete: Cascade)
+  createdForId Int      @unique
+  review       String   @db.MediumText
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Sale {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+}
+
+model Purchase {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+}
+
+model Record {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+  createdAt DateTime @default(now())
+  kind      Kind
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+}
+
+enum Kind {
+  Purchase
+  Sale
+  Fav
 }
