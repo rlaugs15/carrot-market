@@ -4,17 +4,18 @@ import withHandler, {
   ResponesType,
   SessionData,
 } from "@/libs/server/withHandler";
-import { getIronSession, IronSession } from "iron-session";
+import { IronSession } from "iron-session";
 
 async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ResponesType>,
   session: IronSession<SessionData>
 ) {
-  const profile = await client.user.findUnique({
-    where: { id: session.user!.id },
+  const favs = await client.fav.findMany({
+    where: { userId: session.user!.id },
+    include: { product: true },
   });
-  return res.json({ ok: true, profile });
+  return res.json({ ok: true, favs });
 }
 
 export default withHandler({ methods: ["GET"], handler });

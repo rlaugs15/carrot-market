@@ -131,12 +131,16 @@ model Wondering {
 model Review {
   id           Int      @id @default(autoincrement())
   createdBy    User     @relation(name: "writtenReviews", fields: [createdById], references: [id], onDelete: Cascade)
-  createdById  Int      @unique
+  createdById  Int
   createdFor   User     @relation(name: "receivedReviews", fields: [createdForId], references: [id], onDelete: Cascade)
-  createdForId Int      @unique
+  createdForId Int
   review       String   @db.MediumText
+  score        Int      @default(1)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  @@index([createdById])
+  @@index([createdForId])
 }
 
 model Sale {

@@ -1,12 +1,18 @@
+import { User } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useEffect } from "react";
 import useSWR from "swr";
 
+interface IUser {
+  ok: boolean;
+  profile: User;
+}
+
 //const fetcher = (url: string) => fetch(url).then((response) => response.json());
 //유저 데이터에 접근할 수 잇는 훅을 만들고 각 페이지에서 데이터를 불러오면 편하다.
 export default function useUser() {
-  const { data, error } = useSWR("/api/users/me");
+  const { data, error } = useSWR<IUser>("/api/users/me");
   const router = useRouter();
   //데이터가 변경될 때만 호출되도록 `useEffect`를 사용
   useEffect(() => {
