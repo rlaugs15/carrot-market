@@ -7,7 +7,7 @@ import FloatingButton from "@/components/floathing-button";
 import { Product } from "@prisma/client";
 import Item from "@/components/item";
 
-interface ProductWithCount extends Product {
+export interface ProductWithCount extends Product {
   _count: {
     Favs: number;
   };

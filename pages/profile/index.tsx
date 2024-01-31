@@ -113,6 +113,7 @@ const Profile: NextPage = () => {
                 <div className="flex items-center">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <svg
+                      key={star}
                       className={cls(
                         "h-5 w-5",
                         review.score >= star

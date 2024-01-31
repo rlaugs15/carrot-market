@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { useEffect } from "react";
 import useSWR from "swr";
@@ -14,12 +14,16 @@ interface IUser {
 export default function useUser() {
   const { data, error } = useSWR<IUser>("/api/users/me");
   const router = useRouter();
+  const pathname = usePathname();
   //데이터가 변경될 때만 호출되도록 `useEffect`를 사용
   useEffect(() => {
     if (data && !data.ok) {
       return router.replace("/enter");
     }
-  }, [data, router]);
+    if (data && data.ok && pathname === "/enter") {
+      router.replace("/profile");
+    }
+  }, [data, router, pathname]);
   /* useEffect(() => {
     fetch("/api/users/me")
       .then((response) => response.json())

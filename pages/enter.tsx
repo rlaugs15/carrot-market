@@ -21,7 +21,7 @@ interface MutationResult {
 }
 
 const Enter: NextPage = () => {
-  const [enter, { loading, data, error }] =
+  const [enter, { loading, data }] =
     useMutation<MutationResult>("/api/users/enter");
   const [confirmToken, { loading: tokenLoading, data: tokenData }] =
     useMutation<MutationResult>("/api/users/confirm");
@@ -66,7 +66,6 @@ const Enter: NextPage = () => {
                 register={tokenRegister("token")}
                 name="email"
                 label="Confirmation Token"
-                id="input"
                 type="text"
                 required
               />
@@ -114,7 +113,6 @@ const Enter: NextPage = () => {
                     register={register("email")}
                     name="email"
                     label="Email adress"
-                    id="input"
                     type="email"
                     required
                   />
