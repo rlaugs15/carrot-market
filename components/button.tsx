@@ -22,7 +22,7 @@ export default function Button({
         large ? "py-3 text-base" : "py-2 text-sm "
       )}
     >
-      {loading && loading ? "Loading..." : `${text}`}
+      {loading ? "Loading..." : `${text}`}
     </button>
   );
 }

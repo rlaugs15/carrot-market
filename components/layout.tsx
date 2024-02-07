@@ -129,7 +129,7 @@ export default function Layout({
             <span>채팅</span>
           </Link>
           <Link
-            href="/live"
+            href="/streams"
             className={cls(
               "flex flex-col items-center space-y-2",
               pathname === "/live" ? "text-orange-500" : ""

@@ -40,7 +40,7 @@ async function handler(
         where: { id: session.user?.id },
         data: { email },
       });
-      return res.json({ ok: true });
+      res.json({ ok: true });
     }
     if (phone && currentUser?.phone !== phone) {
       const exists = Boolean(
@@ -58,7 +58,7 @@ async function handler(
         where: { id: session.user?.id },
         data: { phone },
       });
-      return res.json({ ok: true });
+      res.json({ ok: true });
     }
     if (name) {
       await client.user.update({

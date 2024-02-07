@@ -30,6 +30,8 @@ model User {
   Sales           Sale[]
   Purchases       Purchase[]
   //Record          Record[]
+  Streams         Stream[]
+  Messages        Message[]
 }
 
 //user의 User타입은 위의 모델, user User하고 저장하면 나머진 자동완성(위의 Token Token[]도), 몽구스의 리퍼런스와 비슷한 역할
@@ -190,3 +192,31 @@ model Purchase {
 //   Sale
 //   Fav
 // }
+
+model Stream {
+  id          Int       @id @default(autoincrement())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      Int
+  name        String
+  price       Int
+  description String    @db.MediumText
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  Messages    Message[]
+
+  @@index([userId])
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    Int
+  message   String   @db.MediumText
+  stream    Stream   @relation(fields: [streamId], references: [id], onDelete: Cascade)
+  streamId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([streamId])
+}
