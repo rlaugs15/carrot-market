@@ -9,7 +9,6 @@ interface StreamReseponse {
   ok: boolean;
   streams: Stream[];
 }
-
 const Stream: NextPage = () => {
   const { data } = useSWR<StreamReseponse>("/api/streams");
   return (
