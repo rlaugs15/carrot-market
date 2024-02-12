@@ -4,11 +4,12 @@ import Input from "./../../components/input";
 import Button from "./../../components/button";
 import { useForm } from "react-hook-form";
 import useUser from "@/libs/client/useUser";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useMutation from "@/libs/client/useMutation";
 import { useRouter } from "next/router";
 
 interface EditProfileForm {
+  avatar?: FileList; //콘솔로그해보면 프로토타입이 파일리스트
   name?: string;
   email?: string;
   phone?: string;
@@ -29,7 +30,9 @@ const EditProfile: NextPage = () => {
     handleSubmit,
     setValue,
     setError,
+    watch,
     formState: { errors },
+    resetField,
   } = useForm<EditProfileForm>();
 
   useEffect(() => {
@@ -38,7 +41,7 @@ const EditProfile: NextPage = () => {
     if (user?.name) setValue("name", user.name);
   }, [user, setValue]);
 
-  const onValid = ({ name, email, phone }: EditProfileForm) => {
+  const onValid = ({ name, email, phone, avatar }: EditProfileForm) => {
     if (loading) return;
     if (email === "" && phone === "") {
       setError("formErrors", {
@@ -62,23 +65,55 @@ const EditProfile: NextPage = () => {
       router.back();
     }
   }, [data, router, setError]);
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const avatar = watch("avatar");
+  //avatar 미리보기
+  useEffect(() => {
+    if (avatar && avatar.length > 0) {
+      //avatar는 FileList고 첫 원소가 파일으므로
+      const file = avatar[0]; //브라우저 메모리에 있는 파일
+      setAvatarPreview(URL.createObjectURL(file)); //URL.createObjectURL()을 통해서 file에 접근
+    } else return;
+  }, [avatar]);
+  const cancelAvatar = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    if (avatarPreview) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+    setAvatarPreview("");
+    resetField("avatar");
+  };
   return (
     <Layout canGoBack title="Edit Profile">
       <form onSubmit={handleSubmit(onValid)} className="py-10 px-4 space-y-4">
         <div className="flex items-center space-x-3">
-          <div className="w-14 h-14 rounded-full bg-slate-500" />
+          {avatarPreview ? (
+            <img
+              src={avatarPreview}
+              className="w-14 h-14 rounded-full bg-slate-500"
+            />
+          ) : (
+            <div className="w-14 h-14 rounded-full bg-slate-500" />
+          )}
           <label
             htmlFor="picture"
             className="cursor-pointer py-2 px-3 border hover:bg-gray-50 border-gray-300 rounded-md shadow-sm text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 text-gray-700"
           >
             Change
             <input
+              {...register("avatar")}
               id="picture"
               type="file"
               className="hidden"
               accept="image/*"
             />
           </label>
+          <button
+            onClick={cancelAvatar}
+            className="cursor-pointer py-2 px-3 border hover:bg-gray-50 border-gray-300 rounded-md shadow-sm text-sm font-medium focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 text-gray-700"
+          >
+            cancel
+          </button>
         </div>
         <Input
           register={register("name")}

@@ -132,7 +132,7 @@ export default function Layout({
             href="/streams"
             className={cls(
               "flex flex-col items-center space-y-2",
-              pathname === "/live" ? "text-orange-500" : ""
+              pathname === "/streams" ? "text-orange-500" : ""
             )}
           >
             <svg
