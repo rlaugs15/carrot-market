@@ -41,20 +41,29 @@ const EditProfile: NextPage = () => {
     if (user?.name) setValue("name", user.name);
   }, [user, setValue]);
 
-  const onValid = ({ name, email, phone, avatar }: EditProfileForm) => {
+  const onValid = async ({ name, email, phone, avatar }: EditProfileForm) => {
     if (loading) return;
     if (email === "" && phone === "") {
       setError("formErrors", {
         message: "email과 phone 중 하나를 입력하세요.",
       });
     }
-    /* 각각 email, phone이 유저의 email, phone과 다를 때만 백엔드로 보냄
+    if (avatar && avatar.length > 0) {
+      //클라우드플레어에게 url 요청
+      const cloudflareReq = await (await fetch("/api/files")).json();
+      console.log(cloudflareReq);
+      return;
+      //파일 업로드
+      editProfile({ name, email, phone /* avatarUrl: CF */ });
+    } else {
+      /* 각각 email, phone이 유저의 email, phone과 다를 때만 백엔드로 보냄
     하지만 백엔드에서 하는게 더 좋아보인다.
     editProfile({
       email: email !== user?.email ? email : "",
       phone: phone !== user?.phone ? phone : "",
     }); */
-    editProfile({ name, email, phone });
+      editProfile({ name, email, phone });
+    }
   };
   const router = useRouter();
   useEffect(() => {
@@ -67,6 +76,8 @@ const EditProfile: NextPage = () => {
   }, [data, router, setError]);
   const [avatarPreview, setAvatarPreview] = useState("");
   const avatar = watch("avatar");
+  console.log(avatar);
+
   //avatar 미리보기
   useEffect(() => {
     if (avatar && avatar.length > 0) {

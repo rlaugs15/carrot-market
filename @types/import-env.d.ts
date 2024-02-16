@@ -8,5 +8,7 @@ declare namespace NodeJS {
     NEXT_PUBLIC_MAIL_ID: string;
     NEXT_PUBLIC_PASSWORD: string;
     NEXT_PUBLIC_COOKIE_PASSWORD: string;
+    NEXT_PUBLIC_CF_TOKEN: string;
+    NEXT_PUBLIC_CF_ID: string;
   }
 }
