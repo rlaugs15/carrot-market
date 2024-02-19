@@ -11,19 +11,15 @@ async function handler(
   res: NextApiResponse<ResponesType>,
   session: IronSession<SessionData>
 ) {
-  const formData = new FormData();
-  formData.append("requireSignedURLs", "true");
-  formData.append("metadata", JSON.stringify({ key: "value" }));
-
   const response = await (
     await fetch(
       `https://api.cloudflare.com/client/v4/accounts/${process.env.NEXT_PUBLIC_CF_ID}/images/v2/direct_upload`,
       {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${process.env.NEXT_PUBLIC_CF_TOKEN}`,
         },
-        body: formData,
       }
     )
   ).json();

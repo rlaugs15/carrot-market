@@ -39,6 +39,10 @@ const EditProfile: NextPage = () => {
     if (user?.email) setValue("email", user.email);
     if (user?.phone) setValue("phone", user.phone);
     if (user?.name) setValue("name", user.name);
+    if (user?.avatar)
+      setAvatarPreview(
+        `https://imagedelivery.net/FctlJjFO0tAVe2g_0a3fiA/${user.avatar}/avatar`
+      );
   }, [user, setValue]);
 
   const onValid = async ({ name, email, phone, avatar }: EditProfileForm) => {
@@ -50,11 +54,16 @@ const EditProfile: NextPage = () => {
     }
     if (avatar && avatar.length > 0) {
       //클라우드플레어에게 url 요청
-      const cloudflareReq = await (await fetch("/api/files")).json();
-      console.log(cloudflareReq);
-      return;
+      const { id, uploadURL } = await (await fetch("/api/files")).json();
+      const form = new FormData();
+      //3번째 인자로 이미지파일의 이름을 유저의 id로 했다.
+      form.append("file", avatar[0], user?.id + "");
+      await fetch(uploadURL, {
+        method: "POST",
+        body: form,
+      });
       //파일 업로드
-      editProfile({ name, email, phone /* avatarUrl: CF */ });
+      editProfile({ name, email, phone, avatarId: id });
     } else {
       /* 각각 email, phone이 유저의 email, phone과 다를 때만 백엔드로 보냄
     하지만 백엔드에서 하는게 더 좋아보인다.
@@ -74,10 +83,9 @@ const EditProfile: NextPage = () => {
       router.back();
     }
   }, [data, router, setError]);
+
   const [avatarPreview, setAvatarPreview] = useState("");
   const avatar = watch("avatar");
-  console.log(avatar);
-
   //avatar 미리보기
   useEffect(() => {
     if (avatar && avatar.length > 0) {
