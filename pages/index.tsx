@@ -31,6 +31,7 @@ const Home: NextPage = () => {
             key={item.id}
             id={item.id}
             title={item.name}
+            image={item.image}
             price={item.price}
             comments={1}
             hearts={item._count.Favs}

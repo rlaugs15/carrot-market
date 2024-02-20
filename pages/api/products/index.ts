@@ -11,7 +11,7 @@ async function handler(
   res: NextApiResponse<ResponesType>,
   session: IronSession<SessionData>
 ) {
-  const { name, price, description } = req.body;
+  const { name, price, description, image } = req.body;
   if (req.method === "GET") {
     const products = await client.product.findMany({
       include: {
@@ -25,12 +25,12 @@ async function handler(
     return res.json({ ok: true, products });
   }
   if (req.method === "POST") {
-    const products = await client.product.create({
+    const product = await client.product.create({
       data: {
         name,
         price: +price,
         description,
-        image: "1234",
+        image,
         user: {
           connect: {
             id: session.user!.id,
@@ -38,7 +38,7 @@ async function handler(
         },
       },
     });
-    return res.json({ ok: true, products });
+    return res.json({ ok: true, product });
   }
 }
 

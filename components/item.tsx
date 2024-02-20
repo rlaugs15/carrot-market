@@ -3,6 +3,7 @@ import Link from "next/link";
 interface ItemProps {
   title: string;
   id: number;
+  image: string;
   price: number;
   comments: number;
   hearts: number;
@@ -11,6 +12,7 @@ interface ItemProps {
 export default function Item({
   title,
   price,
+  image,
   comments,
   hearts,
   id,
@@ -19,7 +21,10 @@ export default function Item({
     <Link href={`/products/${id}`}>
       <div className="flex px-4 pt-5 cursor-pointer justify-between">
         <div className="flex space-x-4">
-          <div className="w-20 h-20 bg-gray-400 rounded-md" />
+          <img
+            src={`https://imagedelivery.net/FctlJjFO0tAVe2g_0a3fiA/${image}/categoryImage`}
+            className="w-20 h-20 rounded-md"
+          />
           <div className="pt-2 flex flex-col">
             <h3 className="text-sm font-medium text-gray-900">{title}</h3>
             <span className="font-medium mt-1 text-gray-900">${price}</span>

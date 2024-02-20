@@ -6,6 +6,7 @@ import { Product, User } from "@prisma/client";
 import Link from "next/link";
 import useMutation from "@/libs/client/useMutation";
 import { cls } from "@/libs/client/utils";
+import useUser from "@/libs/client/useUser";
 
 interface ProductWithUser extends Product {
   user: User;
@@ -19,6 +20,7 @@ interface ProductData {
 }
 
 const ItemDetail: NextPage = () => {
+  const { user } = useUser();
   const router = useRouter();
   const { mutate } = useSWRConfig();
   const {
@@ -44,9 +46,15 @@ const ItemDetail: NextPage = () => {
     <Layout canGoBack>
       <div className="px-4 py-10">
         <div className="mb-8">
-          <div className="h-96 bg-slate-300" />
+          <img
+            src={`https://imagedelivery.net/FctlJjFO0tAVe2g_0a3fiA/${data?.product?.image}/public`}
+            className="h-96 bg-slate-300"
+          />
           <div className="flex cursor-pointer py-3 border-t border-b items-center space-x-3">
-            <div className="w-12 h-12 rounded-full bg-slate-300" />
+            <img
+              src={`https://imagedelivery.net/FctlJjFO0tAVe2g_0a3fiA/${user?.avatar}/avatar`}
+              className="w-12 h-12 rounded-full bg-slate-300"
+            />
             <div>
               <p className="text-sm font-medium text-gray-700">
                 {data?.product?.user?.name}
