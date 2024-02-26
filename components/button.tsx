@@ -9,7 +9,6 @@ interface ButtonProps {
 
 export default function Button({
   large = false,
-  onClick,
   text,
   loading = false,
   ...rest

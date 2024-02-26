@@ -5,6 +5,10 @@ import useUser from "@/libs/client/useUser";
 import useSWR from "swr";
 import { Review, User } from "@prisma/client";
 import { cls } from "@/libs/client/utils";
+import Button from "@/components/button";
+import useMutation from "@/libs/client/useMutation";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 
 interface ReviewWithUser extends Review {
   createdBy: User;
@@ -18,24 +22,42 @@ interface ReviewsRespone {
 const Profile: NextPage = () => {
   const { user } = useUser();
   const { data } = useSWR<ReviewsRespone>("/api/reviews");
-
+  const router = useRouter();
+  const [logout, { data: sessionData, loading }] = useMutation<{ ok: boolean }>(
+    "/api/users/logout"
+  );
+  const onLogout = () => {
+    if (loading) return;
+    logout({});
+  };
+  useEffect(() => {
+    if (sessionData?.ok) {
+      router.push("/enter");
+    }
+  }, [router, sessionData]);
   return (
     <Layout hasTabBar title="나의 캐럿">
       <div className="px-4">
-        <div className="flex items-center mt-4 space-x-3">
-          {user?.avatar ? (
-            <img
-              src={`https://imagedelivery.net/FctlJjFO0tAVe2g_0a3fiA/${user.avatar}/avatar`}
-              className="w-16 h-16 bg-slate-500 rounded-full"
-            />
-          ) : (
-            <div className="w-16 h-16 bg-slate-500 rounded-full" />
-          )}
-          <div className="flex flex-col">
-            <span className="font-medium text-gray-900">{user?.name}</span>
-            <Link href="/profile/edit">
-              <div className="text-sm text-gray-700">Edit profile &rarr;</div>
-            </Link>
+        <div className="flex justify-between items-center ">
+          <div className="flex items-center mt-4 space-x-3">
+            {user?.avatar ? (
+              <img
+                src={`https://imagedelivery.net/FctlJjFO0tAVe2g_0a3fiA/${user.avatar}/avatar`}
+                className="w-16 h-16 bg-slate-500 rounded-full"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-slate-500 rounded-full" />
+            )}
+            <div className="flex flex-col">
+              <span className="font-medium text-gray-900">{user?.name}</span>
+              <Link href="/profile/edit">
+                <div className="text-sm text-gray-700">Edit profile &rarr;</div>
+              </Link>
+            </div>
+          </div>
+
+          <div>
+            <Button onClick={onLogout} text="로그아웃" />
           </div>
         </div>
         <div className="mt-10 flex justify-around">

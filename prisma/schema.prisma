@@ -12,26 +12,29 @@ datasource db {
 }
 
 model User {
-  id              Int         @id @default(autoincrement()) //1~처럼 점점 증가할 것
-  phone           String?     @unique //phone이 있을 때 값이 유일해짐,bigint or string 중에 택
-  email           String?     @unique
+  id              Int            @id @default(autoincrement()) //1~처럼 점점 증가할 것
+  phone           String?        @unique //phone이 있을 때 값이 유일해짐,bigint or string 중에 택
+  email           String?        @unique
   name            String
   avatar          String?
-  createAt        DateTime    @default(now()) //new(): 새 유저가 만들어질 시점의 날짜를 넣어주는 함수
-  updateAt        DateTime    @updatedAt //유저 업데이트
+  createAt        DateTime       @default(now()) //new(): 새 유저가 만들어질 시점의 날짜를 넣어주는 함수
+  updateAt        DateTime       @updatedAt //유저 업데이트
   Tokens          Token[]
   Products        Product[]
   Favs            Fav[]
   Posts           Post[]
   Answers         Answer[]
   Wonderings      Wondering[]
-  writtenReviews  Review[]    @relation(name: "writtenReviews")
-  receivedReviews Review[]    @relation(name: "receivedReviews")
+  writtenReviews  Review[]       @relation(name: "writtenReviews")
+  receivedReviews Review[]       @relation(name: "receivedReviews")
   Sales           Sale[]
   Purchases       Purchase[]
   //Record          Record[]
   Streams         Stream[]
   Messages        Message[]
+  hostChatRoom    ChatRoom[]     @relation(name: "hostChatRoom")
+  invitedChatRoom ChatRoom[]     @relation(name: "invitedChatRoom")
+  ChatMessages    ChatMessages[]
 }
 
 //user의 User타입은 위의 모델, user User하고 저장하면 나머진 자동완성(위의 Token Token[]도), 몽구스의 리퍼런스와 비슷한 역할
@@ -64,6 +67,7 @@ model Product {
   Sales       Sale[]
   Purchases   Purchase[]
   //Record      Record[]
+  ChatRooms   ChatRoom[]
 
   @@index([userId])
 }
@@ -219,4 +223,35 @@ model Message {
 
   @@index([userId])
   @@index([streamId])
+}
+
+model ChatRoom {
+  id           Int            @id @default(autoincrement())
+  host         User           @relation(name: "hostChatRoom", fields: [hostId], references: [id], onDelete: Cascade)
+  hostId       Int
+  invited      User           @relation(name: "invitedChatRoom", fields: [invitedId], references: [id], onDelete: Cascade)
+  invitedId    Int
+  product      Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId    Int
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  ChatMessages ChatMessages[]
+
+  @@index([hostId])
+  @@index([invitedId])
+  @@index([productId])
+}
+
+model ChatMessages {
+  id         Int      @id @default(autoincrement())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     Int
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id], onDelete: Cascade)
+  chatRoomId Int
+  message    String   @db.MediumText
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([chatRoomId])
 }

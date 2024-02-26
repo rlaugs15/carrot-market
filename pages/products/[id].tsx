@@ -2,11 +2,13 @@ import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import Layout from "../../components/layout";
 import useSWR, { useSWRConfig } from "swr";
-import { Product, User } from "@prisma/client";
+import { ChatRoom, Product, User } from "@prisma/client";
 import Link from "next/link";
 import useMutation from "@/libs/client/useMutation";
 import { cls } from "@/libs/client/utils";
 import useUser from "@/libs/client/useUser";
+import Image from "next/image";
+import { useEffect } from "react";
 
 interface ProductWithUser extends Product {
   user: User;
@@ -19,10 +21,14 @@ interface ProductData {
   isLiked: boolean;
 }
 
+interface ChatRoomData {
+  ok: boolean;
+  chatRoom: ChatRoom;
+}
+
 const ItemDetail: NextPage = () => {
   const { user } = useUser();
   const router = useRouter();
-  const { mutate } = useSWRConfig();
   const {
     data,
     mutate: boundMutate,
@@ -30,6 +36,10 @@ const ItemDetail: NextPage = () => {
   } = useSWR<ProductData>(
     router.query.id ? `/api/products/${router.query.id}` : null
   );
+  const [createChatRoom, { data: chatRoomData, loading: chatRoomLoading }] =
+    useMutation<ChatRoomData>(
+      `/api/chats?productId=${data?.product.id}&invitedId=${data?.product.userId}`
+    );
   const [toggleFav] = useMutation(`/api/products/${router.query.id}/fav`);
   const onFavClick = () => {
     //Optimistic UI Update이기 때문에 await 제외
@@ -38,18 +48,31 @@ const ItemDetail: NextPage = () => {
     //상품 이름이 반응형처럼 즉시 바뀜
     if (!isLoading) {
       boundMutate({ ...data, isLiked: !data.isLiked }, false); //두 번째 인자는 다시 데이터를 가져오지 않을 거라 false
-      //mutate('/api/users/me',(prev:any)=>({ok:!prev.false}), false) 언바운드 뮤테이트 예시
+      //mutate('/api/users/me',(prev:any)=>({ok:!prev.false}), false) 언바운드 뮤테이트` 예시
     }
     toggleFav({});
   };
+  const onChatClick = () => {
+    if (chatRoomLoading) return;
+    createChatRoom({});
+  };
+  useEffect(() => {
+    if (chatRoomData?.ok) {
+      router.push(`/chats/${chatRoomData.chatRoom.id}`);
+    }
+  }, [chatRoomData, router]);
   return (
     <Layout canGoBack>
       <div className="px-4 py-10">
         <div className="mb-8">
-          <img
-            src={`https://imagedelivery.net/FctlJjFO0tAVe2g_0a3fiA/${data?.product?.image}/public`}
-            className="h-96 bg-slate-300"
-          />
+          <div className="relative pb-80">
+            <Image
+              alt="상품 이미지"
+              fill={true}
+              src={`https://imagedelivery.net/FctlJjFO0tAVe2g_0a3fiA/${data?.product?.image}/public`}
+              className="h-96 bg-slate-300 object-cover"
+            />
+          </div>
           <div className="flex cursor-pointer py-3 border-t border-b items-center space-x-3">
             <img
               src={`https://imagedelivery.net/FctlJjFO0tAVe2g_0a3fiA/${user?.avatar}/avatar`}
@@ -74,36 +97,41 @@ const ItemDetail: NextPage = () => {
               ${data?.product.price}
             </span>
             <p className=" my-6 text-gray-700">{data?.product.description}</p>
-            <div className="flex items-center justify-between space-x-2">
-              <button className="flex-1 bg-orange-500 text-white py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 font-medium hover:bg-orange-600 focus:ring-orange-500 ">
-                Talk to seller
-              </button>
-              <button
-                onClick={onFavClick}
-                className={cls(
-                  "p-3 rounded-md flex items-center justify-center hover:bg-gray-100 ",
-                  data?.isLiked
-                    ? "text-red-400 hover:text-red-500"
-                    : "text-gray-400 hover:text-gray-500"
-                )}
-              >
-                <svg
-                  className="h-6 w-6 "
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill={data?.isLiked ? "currentColor" : "none"}
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  aria-hidden="true"
+            {user?.id !== data?.product.userId ? (
+              <div className="flex items-center justify-between space-x-2">
+                <button
+                  onClick={onChatClick}
+                  className="flex-1 bg-orange-500 text-white py-3 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 font-medium hover:bg-orange-600 focus:ring-orange-500 "
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                  />
-                </svg>
-              </button>
-            </div>
+                  Talk to seller
+                </button>
+                <button
+                  onClick={onFavClick}
+                  className={cls(
+                    "p-3 rounded-md flex items-center justify-center hover:bg-gray-100 ",
+                    data?.isLiked
+                      ? "text-red-400 hover:text-red-500"
+                      : "text-gray-400 hover:text-gray-500"
+                  )}
+                >
+                  <svg
+                    className="h-6 w-6 "
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill={data?.isLiked ? "currentColor" : "none"}
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
         <div>
